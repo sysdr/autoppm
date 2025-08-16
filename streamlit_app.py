@@ -234,6 +234,14 @@ def show_professional_dashboard():
         if st.button("📊 Export Report", use_container_width=True):
             st.info("Report exported successfully!")
         
+        # Admin-only actions
+        if st.session_state.get('user_role') == 'admin':
+            st.markdown("### 🔐 Admin Actions")
+            if st.button("👥 Manage Users", use_container_width=True):
+                st.info("User management panel coming soon!")
+            if st.button("📊 System Analytics", use_container_width=True):
+                st.info("System analytics panel coming soon!")
+        
         if st.button("🚪 Logout", use_container_width=True):
             st.session_state.authenticated = False
             st.session_state.user_email = None
@@ -302,31 +310,16 @@ def show_dashboard_home():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;">
-            <h4 style="color: #1f77b4;">🔗 Connect Broker</h4>
-            <p style="color: #666; font-size: 0.9rem;">Integrate your trading account</p>
-            <button style="background: #1f77b4; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;">Connect Now</button>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("🔗 Connect Broker", key="connect_broker_quick", use_container_width=True):
+            st.info("Navigate to Broker Integration section to connect your trading account!")
     
     with col2:
-        st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;">
-            <h4 style="color: #1f77b4;">🤖 Create Strategy</h4>
-            <p style="color: #666; font-size: 0.9rem;">Build automated trading strategies</p>
-            <button style="background: #1f77b4; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;">Create Strategy</button>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("🤖 Create Strategy", key="create_strategy_quick", use_container_width=True):
+            st.info("Navigate to Strategy Management section to build automated strategies!")
     
     with col3:
-        st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;">
-            <h4 style="color: #1f77b4;">📊 View Reports</h4>
-            <p style="color: #666; font-size: 0.9rem;">Access performance analytics</p>
-            <button style="background: #1f77b4; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;">View Reports</button>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("📊 View Reports", key="view_reports_quick", use_container_width=True):
+            st.info("Navigate to Performance Reports section to access detailed analytics!")
     
     # Portfolio Overview Chart
     st.markdown("### 📈 Portfolio Performance Overview")
@@ -471,7 +464,6 @@ def show_broker_integration():
         <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;">
             <h4 style="color: #1f77b4;">➕ Add New</h4>
             <p style="color: #666; font-size: 0.9rem;">Connect additional broker</p>
-            <button style="background: #1f77b4; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;">Connect</button>
         </div>
         """, unsafe_allow_html=True)
     
@@ -484,13 +476,20 @@ def show_broker_integration():
         with col1:
             broker_name = st.selectbox("Select Broker", ["Zerodha", "ICICI Direct", "HDFC Securities", "Kotak Securities", "Angel One", "Upstox"])
             account_type = st.selectbox("Account Type", ["Demat + Trading", "Trading Only", "Demat Only"])
+            account_number = st.text_input("Account Number")
         
         with col2:
             api_key = st.text_input("API Key", type="password")
             api_secret = st.text_input("API Secret", type="password")
+            pin = st.text_input("PIN (if required)", type="password")
         
+        # Add validation
         if st.form_submit_button("🔗 Connect Broker"):
-            st.success(f"Successfully connected to {broker_name}!")
+            if validate_broker_connection(broker_name, account_number, api_key, api_secret):
+                st.success(f"Successfully connected to {broker_name}!")
+                st.info("Your broker account is now integrated with AutoPPM. You can start trading and monitoring your portfolio.")
+            else:
+                st.error("Please fill in all required fields to connect your broker.")
     
     # Broker Status
     st.markdown("### 📊 Connection Status")
@@ -504,6 +503,46 @@ def show_broker_integration():
     }
     
     st.dataframe(pd.DataFrame(status_data), use_container_width=True)
+    
+    # Test Connection Button
+    st.markdown("### 🧪 Test Connections")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("🔄 Test Zerodha Connection", use_container_width=True):
+            test_broker_connection("Zerodha")
+    
+    with col2:
+        if st.button("🔄 Test ICICI Connection", use_container_width=True):
+            test_broker_connection("ICICI Direct")
+
+def validate_broker_connection(broker_name, account_number, api_key, api_secret):
+    """Validate broker connection form"""
+    if not broker_name:
+        return False
+    if not account_number:
+        return False
+    if not api_key:
+        return False
+    if not api_secret:
+        return False
+    return True
+
+def test_broker_connection(broker_name):
+    """Test broker connection"""
+    import time
+    
+    with st.spinner(f"Testing {broker_name} connection..."):
+        time.sleep(2)  # Simulate connection test
+        
+        if broker_name == "Zerodha":
+            st.success(f"✅ {broker_name} connection successful!")
+            st.info("Account balance: ₹2,45,000 | Last sync: Just now")
+        elif broker_name == "ICICI Direct":
+            st.success(f"✅ {broker_name} connection successful!")
+            st.info("Account balance: ₹1,85,000 | Last sync: Just now")
+        else:
+            st.error(f"❌ {broker_name} connection failed. Please check your credentials.")
 
 def show_strategy_management():
     """Show strategy management and creation"""
@@ -819,9 +858,17 @@ def show_login_form():
                 st.success("Login successful! Welcome back to AutoPPM!")
                 st.session_state.authenticated = True
                 st.session_state.user_email = email
-                st.session_state.user_full_name = "Demo User"
-                st.session_state.user_role = "trader"
-                st.session_state.account_type = "standard"
+                
+                # Set user role based on email
+                if email == "admin@autoppm.com":
+                    st.session_state.user_full_name = "Admin User"
+                    st.session_state.user_role = "admin"
+                    st.session_state.account_type = "premium"
+                else:
+                    st.session_state.user_full_name = "Demo User"
+                    st.session_state.user_role = "trader"
+                    st.session_state.account_type = "standard"
+                
                 st.balloons()
                 st.rerun()
 
@@ -838,8 +885,57 @@ def show_demo_section():
     - **Performance Analytics**: Comprehensive performance reports
     """)
     
+    # Demo credentials (hidden for admin)
+    if st.session_state.get('user_role') != 'admin':
+        st.markdown("### 🔑 Demo Credentials")
+        st.info("Use these credentials to test the platform:")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Demo User:**")
+            st.code("Email: demo@example.com\nPassword: demo123")
+        
+        with col2:
+            st.markdown("**Admin User:**")
+            st.code("Email: admin@autoppm.com\nPassword: admin123")
+    
     if st.button("🚀 Launch Interactive Demo", use_container_width=True):
         st.info("Interactive demo launching... This feature will be available in the full dashboard!")
+        
+        # Show demo features
+        st.markdown("### 🎯 Demo Features Available")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            **📊 Portfolio Management**
+            - Real-time portfolio tracking
+            - Asset allocation analysis
+            - Performance metrics
+            """)
+            
+            st.markdown("""
+            **🤖 Strategy Management**
+            - Strategy creation forms
+            - Performance tracking
+            - Risk assessment
+            """)
+        
+        with col2:
+            st.markdown("""
+            **🔗 Broker Integration**
+            - Connect multiple brokers
+            - Test connections
+            - Account synchronization
+            """)
+            
+            st.markdown("""
+            **🛡️ Risk Analytics**
+            - VaR calculations
+            - Stress testing
+            - Risk decomposition
+            """)
 
 def validate_signup(first_name, last_name, email, password, confirm_password, agree_terms):
     """Validate signup form"""
