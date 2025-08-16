@@ -345,8 +345,10 @@ class LandingPage:
                         st.session_state.account_type = "standard"
                         st.session_state.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         
-                        # Redirect to portfolio dashboard
-                        st.switch_page("ui/portfolio_dashboard.py")
+                        # Show success message and dashboard access
+                        st.balloons()
+                        st.info("🎉 Welcome to AutoPPM! Your account has been created successfully.")
+                        st.success("You can now access the portfolio dashboard from the sidebar.")
             
             with col1:
                 if st.form_submit_button("Back to Landing", use_container_width=True):
@@ -367,15 +369,16 @@ class LandingPage:
             with col2:
                 if st.form_submit_button("Login", use_container_width=True):
                     if self.validate_login(email, password):
-                        st.success("Login successful! Redirecting to dashboard...")
+                        st.success("Login successful! Welcome back to AutoPPM!")
                         st.session_state.authenticated = True
                         st.session_state.user_email = email
                         st.session_state.user_full_name = "Demo User"
                         st.session_state.user_role = "trader"
                         st.session_state.account_type = "standard"
                         
-                        # Redirect to portfolio dashboard
-                        st.switch_page("ui/portfolio_dashboard.py")
+                        # Show success message
+                        st.balloons()
+                        st.info("🔐 Login successful! You can now access the portfolio dashboard.")
             
             with col1:
                 if st.form_submit_button("Back to Landing", use_container_width=True):
@@ -735,9 +738,25 @@ class LandingPage:
         
         # Check if user is already authenticated
         if st.session_state.authenticated:
-            st.success("✅ Welcome back! Redirecting to dashboard...")
-            # Redirect to portfolio dashboard
-            st.switch_page("ui/portfolio_dashboard.py")
+            st.success("✅ Welcome back to AutoPPM!")
+            st.markdown("## 🎯 Dashboard Access")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📊 Access Portfolio Dashboard", key="access_dashboard", use_container_width=True):
+                    st.info("Portfolio dashboard functionality coming soon!")
+            
+            with col2:
+                if st.button("🚪 Logout", key="logout", use_container_width=True):
+                    st.session_state.authenticated = False
+                    st.session_state.user_email = None
+                    st.session_state.user_full_name = None
+                    st.session_state.user_role = None
+                    st.session_state.account_type = None
+                    st.session_state.created_at = None
+                    st.rerun()
+            
+            st.markdown("---")
             return
         
         # Render landing page sections
