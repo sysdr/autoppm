@@ -431,90 +431,256 @@ def show_portfolio_management():
             st.success("Portfolio data exported!")
 
 def show_broker_integration():
-    """Show broker integration and management"""
-    st.title("🔗 Broker Integration")
+    """Show broker integration and connection management"""
+    st.title("🔌 Broker Integration")
     
-    # Connected Brokers
-    st.markdown("### 🔌 Connected Brokers")
+    # Active Sessions
+    st.markdown("### 🔗 Active Broker Sessions")
     
-    col1, col2, col3 = st.columns(3)
+    # Simulate active sessions
+    active_sessions = [
+        {"broker": "Zerodha", "status": "🟢 Connected", "balance": "₹2,45,000", "last_sync": "2 min ago"},
+        {"broker": "ICICI Direct", "status": "🟡 Pending", "balance": "₹0", "last_sync": "Never"}
+    ]
     
-    with col1:
-        st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;">
-            <h4 style="color: #1f77b4;">📈 Zerodha</h4>
-            <p style="color: #2ca02c;">✅ Connected</p>
-            <p style="color: #666; font-size: 0.9rem;">Account: XXXX1234</p>
-            <p style="color: #666; font-size: 0.9rem;">Balance: ₹2,45,000</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;">
-            <h4 style="color: #1f77b4;">🏦 ICICI Direct</h4>
-            <p style="color: #2ca02c;">✅ Connected</p>
-            <p style="color: #666; font-size: 0.9rem;">Account: XXXX5678</p>
-            <p style="color: #666; font-size: 0.9rem;">Balance: ₹1,85,000</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;">
-            <h4 style="color: #1f77b4;">➕ Add New</h4>
-            <p style="color: #666; font-size: 0.9rem;">Connect additional broker</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Add New Broker
-    st.markdown("### 🔌 Connect New Broker")
-    
-    with st.form("broker_connection"):
-        col1, col2 = st.columns(2)
+    for session in active_sessions:
+        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
         
         with col1:
-            broker_name = st.selectbox("Select Broker", ["Zerodha", "ICICI Direct", "HDFC Securities", "Kotak Securities", "Angel One", "Upstox"])
-            account_type = st.selectbox("Account Type", ["Demat + Trading", "Trading Only", "Demat Only"])
-            account_number = st.text_input("Account Number")
+            st.write(f"**{session['broker']}**")
+        with col2:
+            st.write(session['status'])
+        with col3:
+            st.write(session['balance'])
+        with col4:
+            st.write(session['last_sync'])
+        with col5:
+            if session['status'] == "🟢 Connected":
+                if st.button("🔄 Sync", key=f"sync_{session['broker']}"):
+                    st.success(f"✅ {session['broker']} synced successfully!")
+            else:
+                if st.button("🔗 Connect", key=f"connect_{session['broker']}"):
+                    st.info(f"Redirecting to {session['broker']} connection...")
+        
+        st.divider()
+    
+    # Disconnect Options
+    st.markdown("### ❌ Disconnect Broker")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        broker_to_disconnect = st.selectbox("Select Broker to Disconnect", [s['broker'] for s in active_sessions if s['status'] == "🟢 Connected"])
+    
+    with col2:
+        if st.button("❌ Disconnect", type="secondary"):
+            try:
+                # Simulate disconnection
+                st.success(f"✅ {broker_to_disconnect} disconnected successfully!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Disconnect failed: {e}")
+    
+    # Quick Demo Login
+    st.markdown("### 🚀 Quick Demo Login")
+    
+    with st.expander("🔐 Demo Broker Credentials (Click to expand)"):
+        st.info("Use these demo credentials to test broker integration:")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Zerodha Demo:**")
+            st.code("User ID: DEMO_USER_123\nPassword: demo123")
         
         with col2:
-            api_key = st.text_input("API Key", type="password")
-            api_secret = st.text_input("API Secret", type="password")
-            pin = st.text_input("PIN (if required)", type="password")
+            st.markdown("**ICICI Direct Demo:**")
+            st.code("User ID: ICICI_DEMO\nPassword: demo456")
         
-        # Add validation
-        if st.form_submit_button("🔗 Connect Broker"):
-            if validate_broker_connection(broker_name, account_number, api_key, api_secret):
-                st.success(f"Successfully connected to {broker_name}!")
-                st.info("Your broker account is now integrated with AutoPPM. You can start trading and monitoring your portfolio.")
-            else:
-                st.error("Please fill in all required fields to connect your broker.")
+        if st.button("🔗 Test Demo Login", type="secondary"):
+            st.success("✅ Demo login successful! You can now test broker features.")
     
-    # Broker Status
-    st.markdown("### 📊 Connection Status")
+    st.divider()
     
+    # Add New Broker Connection
+    st.markdown("### 🔌 Connect New Broker")
+    
+    # Broker selection
+    broker_name = st.selectbox(
+        "Select Broker",
+        ["Zerodha", "ICICI Direct", "HDFC Securities", "Kotak Securities", "Angel One", "Upstox"],
+        key="new_broker_select"
+    )
+    
+    # Broker Login Form
+    st.markdown("### 🔐 Broker Login")
+    
+    if broker_name == "Zerodha":
+        st.info("🔐 **Zerodha Integration**: Uses OAuth 2.0 for secure authentication.")
+        
+        # Zerodha OAuth flow
+        if st.button("🚀 Connect to Zerodha", type="primary", use_container_width=True):
+            try:
+                # For demo purposes, we'll simulate the OAuth flow
+                # In production, this would redirect to Zerodha's OAuth page
+                
+                with st.spinner("Initiating Zerodha connection..."):
+                    # Simulate API call delay
+                    import time
+                    time.sleep(2)
+                    
+                    # Create a demo connection (in real app, this would use actual API credentials)
+                    demo_result = {
+                        "success": True,
+                        "login_url": "https://kite.trade/connect/login?api_key=demo_key",
+                        "connection_id": 12345,
+                        "message": "OAuth flow initiated successfully!"
+                    }
+                    
+                    if demo_result['success']:
+                        st.success("✅ OAuth flow initiated!")
+                        
+                        # Show OAuth instructions
+                        st.markdown("### 📋 Next Steps:")
+                        st.markdown("""
+                        1. **Click the login link below** to authenticate with Zerodha
+                        2. **Complete the login** on Zerodha's website
+                        3. **Copy the request token** from the redirect URL
+                        4. **Paste it below** to complete the connection
+                        """)
+                        
+                        # Display login URL
+                        st.markdown(f"**🔗 Login URL:** [Click here to authenticate]({demo_result['login_url']})")
+                        
+                        # Request token input
+                        request_token = st.text_input(
+                            "Enter Request Token from Zerodha:",
+                            placeholder="Paste the request token here after completing Zerodha login",
+                            help="This token is received after successful Zerodha authentication"
+                        )
+                        
+                        if request_token:
+                            if st.button("🔐 Complete Connection", type="primary"):
+                                with st.spinner("Completing OAuth flow..."):
+                                    time.sleep(2)  # Simulate API call
+                                    
+                                    # Simulate successful OAuth completion
+                                    st.success("✅ Successfully connected to Zerodha!")
+                                    st.info("Your Zerodha account is now integrated with AutoPPM.")
+                                    
+                                    # Show account details
+                                    st.markdown("### 📊 Account Details")
+                                    col1, col2 = st.columns(2)
+                                    with col1:
+                                        st.write("**Broker:** Zerodha")
+                                        st.write("**Account Type:** Equity Trading")
+                                        st.write("**Status:** Connected")
+                                    with col2:
+                                        st.write("**User ID:** DEMO_USER_123")
+                                        st.write("**Last Sync:** Just now")
+                                        st.write("**Token Expires:** 24 hours")
+                                    
+                                    st.rerun()
+                    else:
+                        st.error(f"❌ Failed to initiate connection: {demo_result.get('message', 'Unknown error')}")
+                        
+            except Exception as e:
+                st.error(f"❌ Connection failed: {e}")
+    
+    else:
+        # Other brokers - manual API key entry
+        st.info(f"🔑 **{broker_name} Integration**: Enter your API credentials to connect.")
+        
+        # Connection method selection
+        connection_method = st.radio(
+            "Choose Connection Method:",
+            ["🔑 API Keys", "👤 Username/Password", "🔄 Both Methods"],
+            horizontal=True
+        )
+        
+        with st.form(f"broker_connection_{broker_name}"):
+            if connection_method in ["🔑 API Keys", "🔄 Both Methods"]:
+                st.markdown("### 🔑 API Key Authentication")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    account_type = st.selectbox("Account Type", ["Demat + Trading", "Trading Only", "Demat Only"])
+                    account_number = st.text_input("Account Number")
+                    api_key = st.text_input("API Key", type="password")
+                
+                with col2:
+                    api_secret = st.text_input("API Secret", type="password")
+                    pin = st.text_input("PIN (if required)", type="password")
+                    auto_sync = st.checkbox("Enable Auto-sync", value=True)
+            
+            if connection_method in ["👤 Username/Password", "🔄 Both Methods"]:
+                st.markdown("### 👤 Traditional Login")
+                col3, col4 = st.columns(2)
+                
+                with col3:
+                    username = st.text_input("Username/User ID", key=f"username_{broker_name}")
+                    password = st.text_input("Password", type="password", key=f"password_{broker_name}")
+                
+                with col4:
+                    totp_code = st.text_input("TOTP Code (if 2FA enabled)", placeholder="6-digit code", key=f"totp_{broker_name}")
+                    remember_me = st.checkbox("Remember credentials", value=False, key=f"remember_{broker_name}")
+            
+            # Connection options
+            st.markdown("### ⚙️ Connection Options")
+            col5, col6 = st.columns(2)
+            
+            with col5:
+                test_connection = st.checkbox("Test connection before saving", value=True)
+                secure_storage = st.checkbox("Store credentials securely", value=True)
+            
+            with col6:
+                sync_frequency = st.selectbox("Sync Frequency", ["Real-time", "Every 5 min", "Every 15 min", "Daily"])
+                notifications = st.checkbox("Enable connection notifications", value=True)
+            
+            # Submit button
+            if st.form_submit_button("🔗 Connect Broker", use_container_width=True):
+                # Get values based on connection method
+                api_key_val = api_key if connection_method in ["🔑 API Keys", "🔄 Both Methods"] else ""
+                api_secret_val = api_secret if connection_method in ["🔑 API Keys", "🔄 Both Methods"] else ""
+                username_val = username if connection_method in ["👤 Username/Password", "🔄 Both Methods"] else ""
+                password_val = password if connection_method in ["👤 Username/Password", "🔄 Both Methods"] else ""
+                
+                if validate_broker_connection_enhanced(broker_name, account_number, api_key_val, api_secret_val, username_val, password_val):
+                    st.success(f"✅ {broker_name} connection form submitted!")
+                    
+                    if test_connection:
+                        test_broker_connection(broker_name)
+                    
+                    st.info("Note: Manual API key connections require additional verification. Please contact support for assistance.")
+                else:
+                    st.error("Please fill in at least one set of credentials (API keys OR username/password) to connect your broker.")
+    
+    # Connection Status Dashboard
+    st.markdown("### 📊 Connection Status Dashboard")
+    
+    # Simulate connection status data
     status_data = {
-        "Broker": ["Zerodha", "ICICI Direct"],
-        "Status": ["🟢 Connected", "🟢 Connected"],
-        "Last Sync": ["2 min ago", "5 min ago"],
-        "Balance": ["₹2,45,000", "₹1,85,000"],
-        "Actions": ["🔄 Sync", "🔄 Sync"]
+        "Broker": ["Zerodha", "ICICI Direct", "HDFC Securities"],
+        "Status": ["🟢 Connected", "🟡 Pending", "🔴 Disconnected"],
+        "Last Sync": ["2 min ago", "Never", "1 hour ago"],
+        "Balance": ["₹2,45,000", "₹0", "₹0"],
+        "Actions": ["🔄 Sync", "🔗 Connect", "🔗 Connect"]
     }
     
     st.dataframe(pd.DataFrame(status_data), use_container_width=True)
     
-    # Test Connection Button
-    st.markdown("### 🧪 Test Connections")
-    col1, col2 = st.columns(2)
+    # Connection Health
+    st.markdown("### 🏥 Connection Health")
+    
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🔄 Test Zerodha Connection", use_container_width=True):
-            test_broker_connection("Zerodha")
+        st.metric("Active Connections", len(active_sessions), "2")
     
     with col2:
-        if st.button("🔄 Test ICICI Connection", use_container_width=True):
-            test_broker_connection("ICICI Direct")
+        st.metric("Last Sync", "2 min ago", "🟢 Healthy")
+    
+    with col3:
+        st.metric("Total Balance", "₹2,45,000", "+₹12,500")
 
 def validate_broker_connection(broker_name, account_number, api_key, api_secret):
     """Validate broker connection form"""
@@ -526,6 +692,20 @@ def validate_broker_connection(broker_name, account_number, api_key, api_secret)
         return False
     if not api_secret:
         return False
+    return True
+
+def validate_broker_connection_enhanced(broker_name, account_number, api_key, api_secret, username, password):
+    """Enhanced validation for broker connection - accepts either API keys or username/password"""
+    if not broker_name:
+        return False
+    
+    # Check if at least one set of credentials is provided
+    has_api_credentials = account_number and api_key and api_secret
+    has_login_credentials = username and password
+    
+    if not has_api_credentials and not has_login_credentials:
+        return False
+    
     return True
 
 def test_broker_connection(broker_name):
